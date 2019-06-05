@@ -21,7 +21,9 @@ describe('createSocketUrl', () => {
       () => () => url
     );
 
-    const createSocketUrl = require('../../../client-src/default/utils/createSocketUrl');
+    const {
+      default: createSocketUrl,
+    } = require('../../../client-src/default/utils/createSocketUrl');
 
     test(`should return the url when __resourceQuery is ${url}`, () => {
       expect(createSocketUrl(url)).toMatchSnapshot();
