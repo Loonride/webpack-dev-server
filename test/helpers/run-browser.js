@@ -3,7 +3,7 @@
 const puppeteer = require('puppeteer');
 const { puppeteerArgs } = require('./puppeteer-constants');
 
-function runBrowser(config) {
+async function runBrowser(config) {
   const options = {
     viewport: {
       width: 500,
@@ -13,6 +13,7 @@ function runBrowser(config) {
     ...config,
   };
 
+<<<<<<< HEAD
   return new Promise((resolve, reject) => {
     let page;
     let browser;
@@ -33,7 +34,17 @@ function runBrowser(config) {
         resolve({ page, browser });
       })
       .catch(reject);
+=======
+  const launchedBrowser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+>>>>>>> test: make use of async/await (#1996)
   });
+  const browser = launchedBrowser;
+  const page = await browser.newPage();
+  page.emulate(options);
+
+  return { page, browser };
 }
 
 module.exports = runBrowser;

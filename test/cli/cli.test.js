@@ -1,8 +1,8 @@
 'use strict';
 
-const { unlink } = require('fs');
 const { join, resolve } = require('path');
 const execa = require('execa');
+const { unlinkAsync } = require('../helpers/fs');
 const testBin = require('../helpers/test-bin');
 
 const httpsCertificateDirectory = resolve(
@@ -15,6 +15,7 @@ const keyPath = resolve(httpsCertificateDirectory, 'server.key');
 const certPath = resolve(httpsCertificateDirectory, 'server.crt');
 
 describe('CLI', () => {
+<<<<<<< HEAD
   it('--progress', (done) => {
     testBin('--progress')
       .then((output) => {
@@ -40,38 +41,32 @@ describe('CLI', () => {
         done();
       })
       .catch(done);
+=======
+  it('--progress', async () => {
+    const { code, stderr } = await testBin('--progress');
+    expect(code).toEqual(0);
+    expect(stderr.includes('0% compiling')).toBe(true);
+>>>>>>> test: make use of async/await (#1996)
   });
 
-  it('--bonjour', (done) => {
-    testBin('--bonjour')
-      .then((output) => {
-        expect(output.code).toEqual(0);
-        expect(output.stdout.includes('Bonjour')).toBe(true);
-        done();
-      })
-      .catch(done);
+  it('--bonjour', async () => {
+    const { code, stdout } = await testBin('--bonjour');
+    expect(code).toEqual(0);
+    expect(stdout.includes('Bonjour')).toBe(true);
   });
 
-  it('--https', (done) => {
-    testBin('--https')
-      .then((output) => {
-        expect(output.code).toEqual(0);
-        expect(output.stdout.includes('Project is running at')).toBe(true);
-        done();
-      })
-      .catch(done);
+  it('--https', async () => {
+    const { code, stdout } = await testBin('--https');
+    expect(code).toEqual(0);
+    expect(stdout.includes('Project is running at')).toBe(true);
   });
 
-  it('--https --cacert --pfx --key --cert --pfx-passphrase', (done) => {
-    testBin(
+  it('--https --cacert --pfx --key --cert --pfx-passphrase', async () => {
+    const { code, stdout } = await testBin(
       `--https --cacert ${caPath} --pfx ${pfxPath} --key ${keyPath} --cert ${certPath} --pfx-passphrase webpack-dev-server`
-    )
-      .then((output) => {
-        expect(output.code).toEqual(0);
-        expect(output.stdout.includes('Project is running at')).toBe(true);
-        done();
-      })
-      .catch(done);
+    );
+    expect(code).toEqual(0);
+    expect(stdout.includes('Project is running at')).toBe(true);
   });
 
   it('--sockPath', (done) => {
@@ -107,42 +102,36 @@ describe('CLI', () => {
   });
 
   // The Unix socket to listen to (instead of a host).
-  it('--socket', (done) => {
+  it('--socket', async () => {
     const socketPath = join('.', 'webpack.sock');
+    const { code, stdout } = await testBin(`--socket ${socketPath}`);
+    expect(code).toEqual(0);
 
-    testBin(`--socket ${socketPath}`)
-      .then((output) => {
-        expect(output.code).toEqual(0);
+    if (process.platform !== 'win32') {
+      expect(stdout.includes(socketPath)).toBe(true);
 
-        if (process.platform === 'win32') {
-          done();
-        } else {
-          expect(output.stdout.includes(socketPath)).toBe(true);
-
-          unlink(socketPath, () => {
-            done();
-          });
-        }
-      })
-      .catch(done);
+      await unlinkAsync(socketPath);
+    }
   });
 
-  it('should accept the promise function of webpack.config.js', (done) => {
-    testBin(
-      false,
-      resolve(__dirname, '../fixtures/promise-config/webpack.config.js')
-    )
-      .then((output) => {
-        expect(output.code).toEqual(0);
-        done();
-      })
-      .catch((err) => {
-        // for windows
-        expect(err.stdout.includes('Compiled successfully.')).toEqual(true);
-        done();
-      });
+  it('should accept the promise function of webpack.config.js', async () => {
+    try {
+      const { code } = await testBin(
+        false,
+        resolve(__dirname, '../fixtures/promise-config/webpack.config.js')
+      );
+      expect(code).toEqual(0);
+    } catch (err) {
+      // for windows
+      if (process.platform === 'win32') {
+        expect(err.stdout.includes('Compiled successfully.')).toBe(true);
+      } else {
+        throw err;
+      }
+    }
   });
 
+  // TODO: hiroppy
   it('should exit the process when SIGINT is detected', (done) => {
     const cliPath = resolve(__dirname, '../../bin/webpack-dev-server.js');
     const examplePath = resolve(__dirname, '../../examples/cli/public');

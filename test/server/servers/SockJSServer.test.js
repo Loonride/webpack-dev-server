@@ -4,6 +4,7 @@ const http = require('http');
 const express = require('express');
 const SockJS = require('sockjs-client/dist/sockjs');
 const SockJSServer = require('../../../lib/servers/SockJSServer');
+const timer = require('../../helpers/timer');
 const port = require('../../ports-map').SockJSServer;
 
 describe('SockJSServer', () => {
@@ -32,7 +33,7 @@ describe('SockJSServer', () => {
   });
 
   describe('server', () => {
-    it('should recieve connection, send message, and close client', (done) => {
+    it('should recieve connection, send message, and close client', async () => {
       const data = [];
 
       let headers;
@@ -74,15 +75,13 @@ describe('SockJSServer', () => {
       // eslint-disable-next-line new-cap
       const client = new SockJS(`http://localhost:${port}/sockjs-node`);
 
-      setTimeout(() => {
-        // the client closes itself, the server does not close it
-        client.close();
-      }, 1000);
+      await timer(1000);
+      // the client closes itself, the server does not close it
+      client.close();
 
-      setTimeout(() => {
-        expect(receivedClientClose).toBeTruthy();
-        done();
-      }, 3000);
+      await timer(3000);
+      expect(receivedClientClose).toBeTruthy();
+      done();
     });
   });
 
