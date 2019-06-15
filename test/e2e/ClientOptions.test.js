@@ -8,6 +8,7 @@ const config = require('../fixtures/client-config/webpack.config');
 const runBrowser = require('../helpers/run-browser');
 const [port1, port2, port3] = require('../ports-map').ClientOptions;
 const { beforeBrowserCloseDelay } = require('../helpers/puppeteer-constants');
+const timer = require('../helpers/timer');
 
 describe('Client code', () => {
   function startProxy(port) {
@@ -50,19 +51,17 @@ describe('Client code', () => {
     });
 
     afterAll((done) => {
-      proxy.close(() => {
-        done();
-      });
+      proxy.close(done);
     });
 
-    it('responds with a 200', (done) => {
+    it('responds with a 200', async () => {
       {
         const req = request(`http://localhost:${port2}`);
-        req.get('/sockjs-node').expect(200, 'Welcome to SockJS!\n', done);
+        await req.get('/sockjs-node').expect(200, 'Welcome to SockJS!\n');
       }
       {
         const req = request(`http://localhost:${port1}`);
-        req.get('/sockjs-node').expect(200, 'Welcome to SockJS!\n', done);
+        await req.get('/sockjs-node').expect(200, 'Welcome to SockJS!\n');
       }
     });
 

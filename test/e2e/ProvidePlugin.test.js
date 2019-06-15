@@ -82,6 +82,10 @@ describe('ProvidePlugin', () => {
           });
           page.goto(`http://localhost:${port}/main`);
         });
+
+        await browser.close();
+
+        expect(isCorrectClient).toBeTruthy();
       });
     });
   });
@@ -121,6 +125,10 @@ describe('ProvidePlugin', () => {
           });
           page.goto(`http://localhost:${port}/main`);
         });
+
+        await browser.close();
+
+        expect(isCorrectClient).toBeTruthy();
       });
     });
   });

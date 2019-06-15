@@ -130,6 +130,24 @@ describe('reload', () => {
             page.goto(`http://localhost:${port}/main`);
           });
         });
+        fs.writeFileSync(
+          cssFilePath,
+          'body { background-color: rgb(255, 0, 0); }'
+        );
+
+        await page.waitFor(10000);
+
+        const color2 = await page.evaluate(() => {
+          const body = document.body;
+          const bgColor = getComputedStyle(body)['background-color'];
+          return bgColor;
+        });
+
+        await browser.close();
+
+        expect(color).toEqual('rgb(0, 0, 255)');
+        expect(color2).toEqual('rgb(255, 0, 0)');
+        expect(refreshed).toBeTruthy();
       });
     });
   });
